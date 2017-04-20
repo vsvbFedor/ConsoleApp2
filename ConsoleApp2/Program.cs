@@ -10,26 +10,26 @@ namespace ConsoleApp2
     {
         static void Main(string[] args)
         {
-            int x;
-            int z;
+            uint x;
+            uint z;
 
             Console.WriteLine("введите количество строк");
-            while (!int.TryParse(Console.ReadLine(), out x))
+            while (!uint.TryParse(Console.ReadLine(), out x))
             {
-                Console.WriteLine("Это не число");
+                Console.WriteLine("необходимо ввести целое положительное число");
                 Console.WriteLine("введите количество строк");
             }
-
+            
             Console.WriteLine("введите количество столбцов");
-            while (!int.TryParse(Console.ReadLine(), out z))
+            while (!uint.TryParse(Console.ReadLine(), out z))
             {
-                Console.WriteLine("Это не число");
+                Console.WriteLine("необходимо ввести целое положительное число");
                 Console.WriteLine("введите количество столбцов");
             }
 
             int[,] a = new int[x, z];
-            int m = x;
-            int n = z;
+            uint m = x;
+            uint n = z;
             int k = 1;
             int t = 0;
 
@@ -61,7 +61,7 @@ namespace ConsoleApp2
                     }
                 }
 
-                for (int j = n - 1; j > t; j--)
+                for (uint j = n - 1; j > t; j--)
                 {
                     if (a[m - 1, j] == 0)
                     {
@@ -74,7 +74,7 @@ namespace ConsoleApp2
                     }
                 }
 
-                for (int i = m - 1; i > t; i--)
+                for (uint i = m - 1; i > t; i--)
                 {
                     if (a[i, t] == 0)
                     {
