@@ -6,127 +6,155 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp2
 {
-     class Program
+    class Program
     {
-        static void Main(string[] args)
+        static uint EnterValue(string inputvalue)
         {
-            int x;
-            int z;
-
-            // посмотри внимательно на следующий код ввода столбцов и строк
-            // вынеси одинаковый код в отдельную функцию, которая тебе будет возвращать целое число
-            // передавай в функцию текст вопроса для пользователя
-            Console.WriteLine("введите количество строк");
-            while (!int.TryParse(Console.ReadLine(), out x))
+            Console.WriteLine(inputvalue);
+            uint arg;
+            while (!uint.TryParse(Console.ReadLine(), out arg))
             {
-                Console.WriteLine("Это не число");
-                Console.WriteLine("введите количество строк");
+                Console.WriteLine("необходимо ввести целое положительное число");
+                Console.WriteLine(inputvalue);
             }
+            return arg;
+        }
 
-            Console.WriteLine("введите количество столбцов");
-            while (!int.TryParse(Console.ReadLine(), out z))
+        static void OutPutResultArray(Array A)
+        {
+            int resultArray = A.Rank;
+            for (int i = 0; i < A.GetLength(0); i++)
             {
-                Console.WriteLine("Это не число");
-                Console.WriteLine("введите количество столбцов");
-            }
-            ///
-
-
-            // очень тяжело читать такой код, где имена переменных состоят из 1 буквы
-            // это допускается для счетчиков, но лучше всегда писать имена, которые отражают суть 
-            // того, для чего эта переменная нужна
-            // переименуй массив a во чтото типа resultArray
-            // так же придумай имена для других переменных
-            int[,] a = new int[x, z];
-            int m = x;
-            int n = z;
-            int k = 1;
-            int t = 0;
-
-            // 1. если так посмотреть, то получается, что у тебя тут будет m*n тактов цикла
-            // где в каждом выполняются еще 4 цикла с переменным количеством тактов
-            // надо оптимизировать работу алгоритма заполнения так, чтобы заполнение 
-            // проходило за n*m тактов цикла
-
-            // 2. необходимо выделить каждый из вложенных циклов в отдельную функцию
-            // котрая будет принимать на вход массив и начальные положения
-            // тогда код станет читабельным
-            for (int y = 0; y < m*n + 1; y++)
-            {
-                for (int j = t; j < n - 1; j++)
+                for (int j = 0; j < A.GetLength(1); j++)
                 {
-                    if (a[t, j] == 0)
-                    {
-                        a[t, j] = k;
-                        k++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                for (int i = t; i < m - 1; i++)
-                {
-                    if (a[i, n - 1] == 0)
-                    {
-                        a[i, n - 1] = k;
-                        k++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                for (int j = n - 1; j > t; j--)
-                {
-                    if (a[m - 1, j] == 0)
-                    {
-                        a[m - 1, j] = k;
-                        k++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                for (int i = m - 1; i > t; i--)
-                {
-                    if (a[i, t] == 0)
-                    {
-                        a[i, t] = k;
-                        k++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                m--;
-                n--;
-                t++;
-            }
-            
-            // вывод результата надо выделить в отдельную функцию
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < z; j++)
-                {
-                    // это что за читы )
-                    // все заполнение должно быть выше 
-                    // тут только распечатка массива
-                    if (a[i, j] == 0)
-                    {
-                        a[i, j] = k;
-                    }
-                    Console.Write("{0} ", a[i, j]);
+                    Console.Write("{0} ", A.GetValue(i, j));
                 }
                 Console.WriteLine();
             }
             Console.ReadLine();
+        }
+
+        static int stepone(int[,] A, uint tl, uint tc, int c, int cv)
+        {
+            for (int j = c; j < tc - 1; j++)
+            {
+                if (A[c, j] == 0)
+                {
+                    A[c, j] = cv;
+                    cv++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return cv;
+        }
+
+        static int steptwo(int[,] A, uint tl, uint tc, int c, int cv)
+        {
+            for (int i = c; i < tl - 1; i++)
+            {
+                if (A[i, tc - 1] == 0)
+                {
+                    A[i, tc - 1] = cv;
+                    cv++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return cv;
+        }
+
+        static int stepthree(int[,] A, uint tl, uint tc, int c, int cv)
+        {
+            for (uint j = tc - 1; j > c; j--)
+            {
+                if (A[tl - 1, j] == 0)
+                {
+                    A[tl - 1, j] = cv;
+                    cv++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return cv;
+        }
+
+        static int stepfour(int[,] A, uint tl, uint tc, int c, int cv)
+        {
+            for (uint i = tl - 1; i > c; i--)
+            {
+                if (A[i, c] == 0)
+                {
+                    A[i, c] = cv;
+                    cv++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return cv;
+        }
+
+        static void stepfive(int[,] A, uint l, uint c, int cv)
+        {
+            for (int i = 0; i < l; i++)
+            {
+                for (int j = 0; j < c; j++)
+                {
+                    if (A[i, j] == 0)
+                    {
+                        A[i, j] = cv;
+                    }
+                }
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            uint lines = EnterValue("Введите количество строк");
+            uint columns = EnterValue("Введите количество столбцов");
+
+            int[,] resultArray = new int[lines, columns];
+            uint tmpline = lines;
+            uint tmpcolumn = columns;
+            int cellvalue = 1;
+            int counter = 0;
+            uint tact;
+
+            if (lines < columns)
+            {
+                tact = lines / 2;
+            }
+            else
+            {
+                tact = columns / 2;
+            }
+
+            for (int y = 0; y < tact; y++)
+            {
+                cellvalue = stepone(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+
+                cellvalue = steptwo(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+
+                cellvalue = stepthree(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+
+                cellvalue = stepfour(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+
+                tmpline--;
+                tmpcolumn--;
+                counter++;
+            }
+
+            stepfive(resultArray, lines, columns, cellvalue);
+
+            OutPutResultArray(resultArray);
         }
     }
 }
