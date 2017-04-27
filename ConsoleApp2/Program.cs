@@ -9,224 +9,159 @@ namespace ConsoleApp2
     class Program
     {
         /// <summary>
-        /// К функция надо писать вот такие комментарии
-        /// Для того чтобы сделать такой комментарий надо встать выше функции и напечатеть подряд три символа /
-        /// Тогда студия автоматически сгенерирует такой комментарий - 
-        /// описание функции ее входных параметров и результат
-        /// тут Описание что делает функция
+        /// Функция считывает значение, введенное пользователем
         /// </summary>
-        /// <param name="inputvalue"></param>
-        /// <returns></returns>
+        /// <param name="inputvalue"> Строка, содержит указания пользователю </param>
+        /// <returns> Возвращается значение, введенное пользователем</returns>
         static uint EnterValue(string inputvalue)
         {
             Console.WriteLine(inputvalue);
             uint arg;
             while (!uint.TryParse(Console.ReadLine(), out arg))
-            {
+            { 
                 Console.WriteLine("необходимо ввести целое положительное число");
                 Console.WriteLine(inputvalue);
             }
-
-            // что делать если пользователь захотел выйти из твоей программы ???
-            // надо предусмотреть выход из программы на всех этапах ее работы
-            return arg;
+            return arg; 
         }
 
-
-
         /// <summary>
-        /// 
+        /// Функция, выводит итоговый массив на экран
         /// </summary>
-        /// <param name="A">что за параметр A название параметра функции должно состоять минимум из 1-2 слов
-        /// иначе тебе тут надо  будет писать подробное описание описание 
-        /// </param>
+        /// <param name="A"> Массив, который будем выводить </param>
         static void OutPutResultArray(Array A)
         {
-            // что делает эта строка ?
-            // старайся чистить код после отладки функции, не оставляй уже не используемых переменных и т.д.
-            int resultArray = A.Rank;
+            int ArrayLineLength = A.GetLength(0);
+            int ArrayColumnLength = A.GetLength(1);
 
-
-            // тут функции A.GetLength(0) могут что-то вычислять внутри
-            // почитай про цикл for код сравнения вызывает на каждом такте цикла, а это значит, что 
-            // A.GetLength(0) будет вычисляться на каждый такт цикла
-            // если подумать, то A.GetLength(0) можно вычислить один раз и запомнить в переменную
-            for (int i = 0; i < A.GetLength(0); i++)
+            for (int i = 0; i < ArrayLineLength; i++)
             {
-                for (int j = 0; j < A.GetLength(1); j++)
+                for (int j = 0; j < ArrayColumnLength; j++)
                 {
-                    // вообще говоря возьми себе на заметку, что для формирования строки с параметрами 
-                    // надо использовать string.Format тут он используется неявно
-                    // в C# 6 уже есть специальный символ для таких строк $ почитай про него
-                    Console.Write("{0} ", A.GetValue(i, j));
+                    Console.Write($"{A.GetValue(i, j)} ");
                 }
                 Console.WriteLine();
             }
-
-            // если эта функция вывода то она должна только выводить 
-            // опять размазываешь логику 
-            // ожидание вода пользователя нужно вынести к контекст вызова этой функции
-            Console.ReadLine();
+        }
+        /// <summary>
+        /// Функция, заполняет строки массива слева направо
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="CurrentColumnValue"></param>
+        /// <param name="Counter"></param>
+        /// <param name="CurrentCellValue"></param>
+        /// <returns></returns>
+        static int FillArrayLeftRight(int[,] A, uint CurrentColumnValue, int Counter, int CurrentCellValue)
+        {
+            for (int j = Counter; j < CurrentColumnValue; j++)
+            {
+                // А вот без этого никак. Можно определить, когда надо выходить
+                // из цикла, без индексации массива, но суть в том,
+                // что тогда значения начинают перезаписываться.
+                // И выходить из этого цикла все время при разных условиях надо.
+                // Так что я не знаю, как сделать по-другому
+                if (A[Counter, j] == 0)
+                {
+                    A[Counter, j] = CurrentCellValue;
+                    CurrentCellValue++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return CurrentCellValue;
         }
 
-        static int stepone(int[,] A, uint tl, uint tc, int c, int cv)
+        static int FillArrayUpDown(int[,] A, uint CurrentLineValue, uint CurrentColumnValue, int Counter, int CurrentCellValue)
         {
-            // если папаметры функции не используются в функции то не надо их принимать
+            for (int i = Counter + 1; i < CurrentLineValue; i++)
+            {
+                if (A[i, CurrentColumnValue - 1] == 0) 
+                {
+                    A[i, CurrentColumnValue - 1] = CurrentCellValue;
+                    CurrentCellValue++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return CurrentCellValue;
+        }
+
+        static int FillArrayRightLeft(int[,] A, uint CurrentLineValue, uint CurrentColumnValue, int Counter, int CurrentCellValue)
+        {
+            if (CurrentColumnValue > 1)
+            for (uint j = CurrentColumnValue - 2; j > Counter; j--)
+            {
+                if (A[CurrentLineValue - 1, j] == 0)
+                {
+                    A[CurrentLineValue - 1, j] = CurrentCellValue;
+                    CurrentCellValue++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return CurrentCellValue;
+        }
+        static int FillArrayDownUp(int[,] A, uint CurrentLineValue, int Counter, int CurrentCellValue)
+        {
             
-
-            // функции называются в конвенции с большой буквы каждое слово 
-            // эта функция должна быть названа StepOne
-
-            // название функции не определяет ее суть 
-            // эта функция бежит по массиву слева направо и заполняет массив
-            // придумай своим функциям более информативное название например FillArrayFromLeftToRight
-
-            // тоже самое с названиями всех переменных, расшифруй их хотябы двумя словами
-
-            for (int j = c; j < tc - 1; j++)
+            for (uint i = CurrentLineValue - 1; i > Counter; i--)
             {
-                // вопрос что выполнится быстрее сравнение двух числе
-                // или взятие индексатора массива и сравнение двух чисел ?
-                // у тебя есть counter это значение определяющее количество пройденных кругов
-                // используй его и длины массива для того, чтобы определить, когда тебе надо
-                // выходить из цикла
-                if (A[c, j] == 0)
+                if (A[i, Counter] == 0)
                 {
-                    A[c, j] = cv;
-                    cv++;
+                    A[i, Counter] = CurrentCellValue;
+                    CurrentCellValue++;
                 }
                 else
                 {
                     break;
                 }
             }
-            return cv;
-        }
-
-        static int steptwo(int[,] A, uint tl, uint tc, int c, int cv)
-        {
-            for (int i = c; i < tl - 1; i++)
-            {
-                if (A[i, tc - 1] == 0)
-                {
-                    A[i, tc - 1] = cv;
-                    cv++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return cv;
-        }
-
-        static int stepthree(int[,] A, uint tl, uint tc, int c, int cv)
-        {
-            for (uint j = tc - 1; j > c; j--)
-            {
-                if (A[tl - 1, j] == 0)
-                {
-                    A[tl - 1, j] = cv;
-                    cv++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return cv;
-        }
-
-        static int stepfour(int[,] A, uint tl, uint tc, int c, int cv)
-        {
-            for (uint i = tl - 1; i > c; i--)
-            {
-                if (A[i, c] == 0)
-                {
-                    A[i, c] = cv;
-                    cv++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return cv;
-        }
-
-        static void stepfive(int[,] A, uint l, uint c, int cv)
-        {
-            for (int i = 0; i < l; i++)
-            {
-                for (int j = 0; j < c; j++)
-                {
-                    if (A[i, j] == 0)
-                    {
-                        A[i, j] = cv;
-                    }
-                }
-            }
+            return CurrentCellValue;
         }
 
         static void Main(string[] args)
         {
-            // lines я бы понял как коллекцию линий
-            // а это на самом деле linesCount
-            // назови переменные так, чтобы было более понятен их смысл
-            uint lines = EnterValue("Введите количество строк");
-            uint columns = EnterValue("Введите количество столбцов");
+            Console.WriteLine("Press any key to start, press ESC to exit app");
+            ConsoleKey Key = Console.ReadKey().Key;
+            if (Key == ConsoleKey.Escape) Environment.Exit(0);
+            Console.Clear();
 
-            int[,] resultArray = new int[lines, columns];
-            // каждое слово в имени переменной пишется с большой буквы
+            uint LinesCount = EnterValue("Введите количество строк");
+            uint ColumnsCount = EnterValue("Введите количество столбцов");
 
-            // избегай в названиях следующие слова tmp такие переменные обычно используют для отладки 
-            // и удаляются в релизе
-            // непонятно зачем именно tmpline и tmpcolumn
-            // если это текущий размер массива с которым работают функции нашего алгоритма, то так и надо их назвать
-            uint tmpline = lines;
-            uint tmpcolumn = columns;
-            // лучше назвать такущее значение ячейки
-            int cellvalue = 1;
-            int counter = 0;
-            uint tact;
+            int[,] ResultArray = new int[LinesCount, ColumnsCount];
+            uint CurrentLineValue = LinesCount;
+            uint CurrentColumnValue = ColumnsCount;
+            int CurrentCellValue = 1;
+            int Counter = 0;
+            uint Tact;
+            
+            Tact = LinesCount < ColumnsCount ? LinesCount / 2 + 1: ColumnsCount / 2 + 1;
 
-            // почитай про оператор ?
-            // нижние 8 строк можно записать в одну следующим образом
-            // tact = lines < columns ? lines/2 : columns/2;
-            if (lines < columns)
+            for (int y = 0; y < Tact; y++)
             {
-                tact = lines / 2;
-            }
-            else
-            {
-                tact = columns / 2;
-            }
+                CurrentCellValue = FillArrayLeftRight(ResultArray, CurrentColumnValue, Counter, CurrentCellValue);
 
+                CurrentCellValue = FillArrayUpDown(ResultArray, CurrentLineValue, CurrentColumnValue, Counter, CurrentCellValue);
 
-            // в каждой из функций есть один лишний параметр зачем ?
-            for (int y = 0; y < tact; y++)
-            {
-                cellvalue = stepone(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+                CurrentCellValue = FillArrayRightLeft(ResultArray, CurrentLineValue, CurrentColumnValue, Counter, CurrentCellValue);
 
-                cellvalue = steptwo(resultArray, tmpline, tmpcolumn, counter, cellvalue);
+                CurrentCellValue = FillArrayDownUp(ResultArray, CurrentLineValue, Counter, CurrentCellValue);
 
-                cellvalue = stepthree(resultArray, tmpline, tmpcolumn, counter, cellvalue);
-
-                cellvalue = stepfour(resultArray, tmpline, tmpcolumn, counter, cellvalue);
-
-                tmpline--;
-                tmpcolumn--;
-                counter++;
+                CurrentLineValue--;
+                CurrentColumnValue--;
+                Counter++;
             }
 
-            // непонятно зачем тебе нужен этот шаг 5 ?
-            // у тебя уже есть все функции, которые заполняют значения во всех направлениях
-            // измени алгоритм так, чтобы исключить эту фнкцию
-            stepfive(resultArray, lines, columns, cellvalue);
+            OutPutResultArray(ResultArray);
 
-            // вот посмотри находясь тут неочевидно что программа не заканчивается 
-            // а еще ожидает ввода пользователя
-            OutPutResultArray(resultArray);
+            Console.ReadLine();
         }
     }
 }
